@@ -1,0 +1,206 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{enumerate}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{corollary}{Corollary}[section]
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[section]
+\newtheorem{procedure}{Procedure}[section]
+
+\DeclareMathOperator{\vers}{vers}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\Tran}{Tran}
+\DeclareMathOperator{\Rot}{Rot}
+
+\title{Motion and Manipulation Formula Sheet}
+\author{Tom Rijnbeek}
+
+\begin{document}
+
+\section{Kinematics}
+
+\subsection{Notations}
+Fixed (or world, global) frame $F$: $\{f_1, f_2, f_3\}$\newline
+Moving (or body, local) frame $M$: $\{m_1, m_2, m_3\}$\newline
+We denote the moving coordinates by $\vec{p}$ and the fixed coordinates by $\vec{q}$.
+
+\subsection{Rotations}
+\begin{definition}
+$R_i(\theta)$ is the rotation matrix about the fixed axis $f_i$ with angle $\theta$:\newline
+$R_1(\theta) = 
+\begin{pmatrix}
+1 & 0 & 0 \\
+0 & \cos \theta & -\sin \theta \\
+0 & \sin \theta & \cos \theta
+\end{pmatrix}$; 
+$R_2(\theta) = 
+\begin{pmatrix}
+\cos \theta & 0 & \sin \theta \\
+0 & 1 & 0 \\
+-\sin \theta & 0 & \cos \theta
+\end{pmatrix}$;\newline
+$R_3(\theta) = 
+\begin{pmatrix}
+\cos \theta & -\sin \theta & 0 \\
+\sin \theta & \cos \theta & 0 \\
+0 & 0 & 1
+\end{pmatrix}$.
+\end{definition}
+
+\begin{definition}
+$A_i(\theta)$ is the rotation matrix about the moving axis $m_i$ with angle $\theta$:\newline
+$A_1(\theta) = 
+\begin{pmatrix}
+1 & 0 & 0 \\
+0 & \cos \theta & \sin \theta \\
+0 & -\sin \theta & \cos \theta
+\end{pmatrix}$; 
+$A_2(\theta) = 
+\begin{pmatrix}
+\cos \theta & 0 & -\sin \theta \\
+0 & 1 & 0 \\
+\sin \theta & 0 & \cos \theta
+\end{pmatrix}$;\newline
+$A_3(\theta) = 
+\begin{pmatrix}
+\cos \theta & \sin \theta & 0 \\
+-\sin \theta & \cos \theta & 0 \\
+0 & 0 & 1
+\end{pmatrix}$.
+\end{definition}
+
+\begin{equation*}
+\vec{q} = R_i \vec{p} = A_i^{-1}\vec{p} = A_i^T \vec{p}
+\end{equation*}
+\begin{equation*}
+\vec{p} = A_i \vec{q} = R_i^{-1}\vec{q} = R_i^T \vec{q}
+\end{equation*}
+
+\begin{theorem}\label{thm_succesive-rotation}\hfill
+\begin{enumerate}[{(a)}]
+\item Given local coordinates $\vec{p}$. Then the global coordinates of these coordinates after $n$ rotations $R_1, ..., R_n$ about the global axes can be found as $\vec{q} = R_n \cdots R_2 R_1 \vec{p}$.\newline
+\item Given global coordinates $\vec{q}$. Then the local coordinates of these coordinates after $n$ rotations $A_1, ..., A_n$ about the local axes can be found as $\vec{p} = A_n \cdots A_2 A_1 \vec{q}$.\newline
+\end{enumerate}
+\end{theorem}
+
+\begin{corollary}
+From $\vec{p} = A_n \cdots A_2 A_1 \vec{q}$ (theorem \ref{thm_succesive-rotation}a) follows \newline
+\begin{equation*}
+\begin{array}{lcrl}
+\vec{q} & = & \left( A_n \cdots A_2 A_1 \right)^{-1} & \vec{p} \\
+& = & A_1^{-1} A_2^{-1} \cdots A_n^{-1} & \vec{p} \\
+& = & R_1 R_2 \cdots R_n & \vec{p}.
+\end{array}
+\end{equation*}
+\end{corollary}
+
+\subsection{Orientations}
+\begin{theorem}
+The rotation matrix $R$ that maps moving coordinates to fixed coordinates with an angle $\phi$ about axis $\bar{u}$ (unit vector in global space) is given by:\newline
+\begin{equation*}
+R = I \cos \phi + \bar{u}\bar{u}^T \vers \phi + \tilde{u} \sin \phi
+\end{equation*}
+where
+\begin{equation*}
+\vers \phi = 1 - \cos \phi = 2 \sin^2 \frac{\phi}{2}
+\end{equation*}
+\begin{equation*}
+\tilde{u} = -\tilde{u}^T = \begin{pmatrix}
+0 & -u_3 & u_2 \\
+u_3 & 0 & -u_1 \\
+-u_2 & u_1 & 0
+\end{pmatrix}
+\end{equation*}
+\end{theorem}
+
+\begin{theorem}
+Given the rotation matrix $R$, the axis $\bar{u}$ and angle $\phi$ can be retrieved using:
+\begin{equation*}
+\cos \phi = \frac{1}{2}(\tr(R) - 1)
+\end{equation*}
+\begin{equation*}
+\tilde{u} = \frac{1}{2 \sin \phi}(R - R^T)
+\end{equation*}
+\end{theorem}
+
+\begin{definition}
+Given rotation angle $\phi$ and axis $\bar{u}$, the \emph{Euler parameters} are given by:
+\begin{equation*}
+\begin{array}{lclr}
+e_0 & = & \cos \frac{\phi}{2} & \\
+e_i & = & u_i \sin \frac{\phi}{2} & \mbox{ for } i = 1, 2, 3
+\end{array}
+\end{equation*}
+\end{definition}
+
+\begin{theorem}
+If the transformation $R$ for the rotation is given, we can recover the Euler parameters by:
+\begin{equation*}
+e_0^2 = \frac{1}{4}(\tr(R) + 1)
+\end{equation*}
+\begin{equation*}
+\tilde{e} = \frac{1}{4e_0}(R - R^T)
+\end{equation*}
+\end{theorem}
+
+\subsection{Rigid transformations}
+\begin{lemma}
+Assume $F$ to be the default orthonormal basis and $M$ given by $m_1, m_2, m_3$ another orthornormal basis. Then the matrix $R$ that transforms global coordinates into local is given by $R = \begin{pmatrix} m_1 & m_2 & m_3 \end{pmatrix}$.\newline
+In general, if $F$ is an orthonormal basis given by $f_1, f_2, f_3$, then
+\begin{equation*}
+R = \begin{pmatrix}
+f_1m_1 & f_1m_2 & f_1m_3 \\
+f_2m_1 & f_2m_2 & f_2m_3 \\
+f_3m_1 & f_3m_2 & f_3m_3
+\end{pmatrix}
+\end{equation*}
+\end{lemma}
+
+\begin{definition}
+A \emph{placement} is a rotation followed by a translation. We represent a placement $\vec{q} = (q_1, q_2, q_3)^T \in \mathbb{R}^3$ by $\vec{q'} = (q_1, q_2, q_3, 1) \in \mathbb{R}^4$.
+\end{definition}
+
+\begin{definition}
+Translation along a threedimensional $\vec{t} \in \mathbb{R}^3$:
+\begin{equation*}
+\Tran(t) = \begin{pmatrix}
+I_3 & t \\
+0_3^T & 1
+\end{pmatrix}
+\end{equation*}
+\begin{equation*}
+\Tran(t)^{-1} = \Tran(-t)
+\end{equation*}
+\end{definition}
+
+\begin{definition}
+Rotation by angle $\theta$ about axis $k$:
+\begin{equation*}
+\Rot_k(\theta) = \begin{pmatrix}
+R_k(\theta) & 0_3 \\
+0_3^T & 1
+\end{pmatrix}
+\end{equation*}
+\begin{equation*}
+\Rot_k^{-1}(\theta) = \Rot_k(-\theta) = \Rot_k^T(\theta)
+\end{equation*}
+\end{definition}
+
+\begin{procedure}
+Initialize $M = F \rightarrow T := I$.\newline
+Process next transformation of $M$:\newline
+\begin{tabular}{rlcl}
+- & rotation by $\theta$ about axis $f_k$ & $\rightarrow$ & $T := \Rot_k(\theta) \cdot T$ \\
+- & translation by $c$ units along axis $f_k$ & $\rightarrow$ & $T := \Tran(c \vec{e_k}) \cdot T$ \\
+- & rotation by $\theta$ about axis $m_k$ & $\rightarrow$ & $T := T \cdot \Rot_k(\theta)$ \\
+- & translation by $c$ units along axis $m_k$ & $\rightarrow$ & $T := T \cdot \Tran(c \vec{e_k})$ \\
+\end{tabular}
+\end{procedure}
+
+\end{document}
