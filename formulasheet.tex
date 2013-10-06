@@ -17,11 +17,24 @@
 \DeclareMathOperator{\tr}{tr}
 \DeclareMathOperator{\Tran}{Tran}
 \DeclareMathOperator{\Rot}{Rot}
+\DeclareMathOperator{\Screw}{Screw}
 
 \title{Motion and Manipulation Formula Sheet}
 \author{Tom Rijnbeek}
 
 \begin{document}
+
+\section{Goniometrics}
+
+\subsection{Common values}
+
+\subsection{Sum formulas}
+\begin{align*}
+	\sin(\alpha + \beta) &= \sin(\alpha)\cos(\beta) + \cos(\alpha)\sin(\beta) \\
+	\cos(\alpha + \beta) &= \cos(\alpha)\cos(\beta) - \sin(\alpha)\sin(\beta) \\
+	\cos(\alpha - \beta) &= \cos(\alpha)\cos(\beta) + \sin(\alpha)\sin(\beta) \\
+	\sin(\alpha - \beta) &= \sin(\alpha)\cos(\beta) - \cos(\alpha)\sin(\beta)
+\end{align*}
 
 \section{Kinematics}
 
@@ -202,5 +215,38 @@ Process next transformation of $M$:\newline
 - & translation by $c$ units along axis $m_k$ & $\rightarrow$ & $T := T \cdot \Tran(c \vec{e_k})$ \\
 \end{tabular}
 \end{procedure}
+
+\subsection{Denavit-Hartenberg representation}
+\begin{definition}
+Joint $k$ connects link $k-1$ and link $k$.
+\begin{itemize}
+\item Joint angle $\theta_k$: angle of rotation about $z_{k-1}$ to make $x_{k-1}$ parallel with $x_k$.
+\item Joint distance $d_k$: distance of translation along $z_{k-1}$ to make $x_{k-1}$ intersect with $x_k$.
+\end{itemize}
+Link $k$ connects joint $k$ with joint $k+1$.
+\begin{itemize}
+\item Twist angle $\alpha_k$: angle of rotation about $x_k$ to make $z_{k-1}$ parallel with $z_k$.
+\item Link length $a_k$: distance of translation along $x_k$ to make $z_{k-1}$ interesect with $z_k$.
+\end{itemize}
+\end{definition}
+
+\begin{procedure}
+\emph{The Denavit-Hartenberg algorithm} assigns coordinate fromes to links/joints and determines parameters in a systematic way to get a ``standard form'' for all coordinate transforms. Below is an outline of this algoritm; for a more in-depth description please refer to the slides.
+\begin{enumerate}
+\item joint numbering;
+\item assignment of base frame $L_0$;
+\item assignment of frames 1 through $k-1$ ($L_1, ..., L_{k-1}$);
+\item assignment of tool frame $L_k$;
+\item computation of joint and link parameters.
+\end{enumerate}
+\end{procedure}
+
+\begin{definition}
+$\Screw_i(\theta, d) = \Rot_i(\theta) \cdot \Tran(d e_i)$
+\end{definition}
+
+\begin{theorem}
+Every transformation $T $ from $L_k$ to $L_{k-1}$ can be expressed as two screw operations. I.e. $\Screw_3(\theta_k, d_k) \cdot \Screw_1(\alpha_k, a_k)$ maps coordinates with respect to $L_k$ to coordinates with respect to $L_{k-1}$.
+\end{theorem}
 
 \end{document}
