@@ -4,6 +4,7 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{enumerate}
+\usepackage[a4paper]{geometry}
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}{Lemma}[section]
@@ -24,9 +25,14 @@
 
 \begin{document}
 
-\section{Goniometrics}
+\section{Trigonometry}
 
 \subsection{Common values}
+\begin{tabular}{r|ccccc}
+$\phi$ & $0$ & $\frac{\pi}{6}$ & $\frac{\pi}{4}$ & $\frac{\pi}{3}$ & $\frac{\pi}{2}$ \\ \hline
+$\sin \phi$ & $0$ & $\frac{1}{2}$ & $\frac{\sqrt{2}}{2}$ & $\frac{\sqrt{3}}{2}$ & $1$ \\
+$\cos \phi$ & $1$ & $\frac{\sqrt{3}}{2}$ & $\frac{\sqrt{2}}{2}$ & $\frac{1}{2}$ & $0$
+\end{tabular}
 
 \subsection{Sum formulas}
 \begin{align*}
@@ -249,4 +255,103 @@ $\Screw_i(\theta, d) = \Rot_i(\theta) \cdot \Tran(d e_i)$
 Every transformation $T $ from $L_k$ to $L_{k-1}$ can be expressed as two screw operations. I.e. $\Screw_3(\theta_k, d_k) \cdot \Screw_1(\alpha_k, a_k)$ maps coordinates with respect to $L_k$ to coordinates with respect to $L_{k-1}$.
 \end{theorem}
 
+\section{Path generation}
+\paragraph{Cubic paths}
+Given four conditions $q(t_0) = q_0, q(t_f) = q_f, q'(t_0) = v_0, q'(t_f) = v_f$. Fit cubic polynomial \[ q(t) = a_0 + a_1t + a_2t^2 + a_3t^3 \] and solve for $a_0, a_1, a_2, a_3$.
+
+\paragraph{Quadratic paths}
+Given three conditions $q(t_0) = q_0, q(t_i) = q_i, q(t_f) = q_f$. Fit quadratic polynomial \[ q(t) = a_0 + a_1t + a_2t^2 \] and solve for $a_0, a_1, a_2$.
+
+\paragraph{General polynomial paths}
+Given $n+1$ conditions, fir $n$-degree polynomial and solve for $a_0, a_1, ..., a_n$.
+
+\section{Configutation space}
+Let $W$ be the workspace, $A$ a robot with fixed shape, $B$ the collection of obstacles, $C$ the configuration space (space of all possible placements of the robot). Denote a configuration (unique characterization of robot placement by a (minimum) number of parameters) by $q$.
+
+\begin{definition}
+A configuration $q$ is \emph{free} if $\forall B_i \in B : A(q) \cap B_i = \emptyset$; a configuration $q$ is \emph{forbidden} if $\exists B_i \in B : A(q) \cap B_i \neq \emptyset$.
+\end{definition}
+
+\begin{definition}
+Let $CB_i = \left\{ q \in C | A(q) \cap B_i \neq \emptyset \right\}$ be the configuration space obstacle for $B_i$. Then the forbidden space $CB := \bigcup \limits_i CB_i$ and the free space $C_{free} := C \backslash CB$.
+\end{definition}
+
+\begin{definition}
+The Minkowsky sum of set $P$ and $Q$ is defined as \[ P \oplus Q := \left\{ p + q | p \in P, q \in Q \right\}. \] For convex objects with $m$ and $n$ vertices, this can be calculated in $O(m + n)$ time. If one polygon is non-convex, this becomes $\Omega(mn)$ and for two non-convex polygons the complexity is $\Omega(m^2n^2)$.
+\end{definition}
+
+\begin{corollary}
+\[ CB_i = B_i \oplus (-A) \]
+\end{corollary}
+
+\section{Collision detection}
+
+\begin{lemma}
+Objects $A$ and $B$ intersect if and only if $O \in B \oplus (-A)$ and equivalently $O \in A \oplus (-B)$.\newline
+If $A$ and $B$ intersect then the point $v$ closest to $O$ on the boundary of $B \oplus (-A)$ corresponds to the shortest translation taking apart $A$ and $B$ ($|v|$ is called the \emph{penetration depth}).\newline
+If $A$ and $B$ don't intersect, this point $v$ is the shortest translation to make them intersect. $|v|$ is referred to as the \emph{distance}.
+\end{lemma}
+
+\begin{theorem}[Seperating Axis Theorem]
+A separating axis of two disjoint objects $A$ and $B$ is a vector $\vec{v}$ such that $A$ and $B$ projected on $\vec{v}$ do not intersect. For any pair of non-intersecting polytopes, there exists a separating axis that is orthogonal to a facet of either polytope, or orthogonal to an edge of each polytope.
+\end{theorem}
+
+\begin{definition}
+A separating plane leaves objects on two opposite sides. A strong separating plane is non-touching, but is hard to find. Weak separating planes can touch the objects.
+\end{definition}
+
+\begin{definition}
+Support mapping gives (an) extreme point $S_C(d)$ in $C$ in any direction $d$ (not always uniquely defined).
+\end{definition}
+
+\begin{definition}
+An $n$-simplex is an $n$-dimensional polytope that can be defined with the least amount of vertices.
+\end{definition}
+
+\begin{procedure}[GJK algorithm] The GJK algorithm calculates the penetration depth.
+\begin{enumerate}
+\item initiale $d$-simplex set $Q$ with up to $d+1$ points from $C$ (in $d$ dimensions);
+\item compute point $P$ of minimum norm in the convex hull $CH(Q)$;
+\item if $P$ is the origin, exit, return $0$;
+\item reduce $Q$ to the smallest subset $Q'$ of $Q$ such that $P \in CH(Q')$;
+\item let $V = S_C(-P)$ be a supporting point in direction $-P$;
+\item if $V$ is not more extreme in direction $-P$ than $P$ itself, exit, return $||P||$;
+\item add $V$ to $Q$, go to step 2.
+\end{enumerate}
+\end{procedure}
+
+\section{Force closure}
+\begin{definition}
+A screw is a line in space with an associated pitch, which is the ratio of linear to angular quantities. A twist is a screw plus a scalar magnitude, giving a rotation about the screw axis plus a translation along the screw axis.
+\end{definition}
+
+\begin{definition}
+Given a line $l$: $\vec{x} = \vec{p} + \lambda \vec{q}$. The Pl\"ucker coordinates of $l$ are $(\vec{q}, \vec{q_0})$, where $\vec{q_0} = \vec{p} \times \vec{q}$. The magnitude $\frac{|\vec{q_0}|}{|\vec{q}|}$ gives the distance from the origin to the line $l$. $\vec{q_0} = \vec{0}$ corresponds to a line through the origin; $\vec{q} = \vec{0}$ corresponds to a line at infinity.
+\end{definition}
+
+\begin{definition}
+The screw coordinates are defined as $(\vec{s}, \vec{s_0})$, where $\vec{s} = \vec{q}$ and $\vec{s_0} = \vec{q_0} + p\vec{q}$ (where $p$ is the pitch).\newline
+Given the screw coordinates, we can retrieve the pitch by $p = \frac{\vec{s} \cdot \vec{s_0}}{\vec{s} \cdot \vec{s}}$.
+\end{definition}
+
+\begin{lemma}
+$\vec{f_1}, \vec{f_2}, \vec{f_3}$ can resist all external forces if they form a positive basis:
+\begin{itemize}
+\item any vector $\vec{f}$ can be written as $-\vec{f} = k_1\vec{f_1} + k_2\vec{f_2} + k_3\vec{f_3}$ for some $k_1, k_2, k_3 \leq 0$, or equivalently
+\item $k_1\vec{f_1} + k_2\vec{f_2} + k_3\vec{f_3} = O$ for some $k_1, k_2, k_3 > 0$, or equivalently
+\item the convex hull of $\vec{f_1}, \vec{f_2}, \vec{f_3}$ has $O$ in its interior.
+\end{itemize}
+\end{lemma}
+
+\begin{definition}
+A force $f$ applied on a part in point $p$ are expressed by a wrench, consisting of a force $f$ and moment $p \times f$: \[ w = \begin{pmatrix}f\\p \times f\end{pmatrix} \]
+\end{definition}
+
+\begin{definition}
+Force closure: wrenches $w_1, ..., w_k$ should be able to resist any external force, so
+\begin{itemize}
+\item $w_1, ..., w_k$ form a positive basis for wrench space, so
+\item the convex hull of $w_1, ..., w_k$ has $O$ in its interior.
+\end{itemize}
+\end{definition}
 \end{document}
